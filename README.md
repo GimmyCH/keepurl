@@ -10,16 +10,11 @@
 ✅ 批量新增、删除监控 URL
 ✅ 自带状态 UI（在线 / 离线 / 异常）
 
-🌐 在线演示（可选）
-
-🔗 Demo URL（你可以放自己的域名）
-https://your-worker-domain.workers.dev/
 
 📸 截图预览（可选）
 
-你可以添加类似以下内容：
+<img width="2083" height="1238" alt="image" src="https://github.com/user-attachments/assets/6084f190-0e08-46e9-8902-b0b51bcd446a" />
 
-![dashboard](./screenshots/dashboard.png)
 
 ✨ 功能特点
 🔍 1. 多 URL 实时监控
