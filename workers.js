@@ -16,8 +16,7 @@ const PASSWORD = '';  // 修改这里来设置你的操作密码
 
 // 默认 URL 列表 (如果 KV 为空时初始化用)
 const DEFAULT_URLS = [
-  "www.abc.com",
-  ""
+  "https://www.abc.com"
 ];
 
 // HTML 模板
@@ -468,8 +467,8 @@ async function handleRequest(request) {
   if (request.method === 'POST' && url.pathname === '/api/urls') {
     const { urls: newUrls, password } = await request.json();
 
-    if (password !== 'chenli12') {
-      return new Response('Unauthorized', { status: 401 });
+  if (password !== PASSWORD) {
+      return new Response("Unauthorized", { status: 401 });
     }
 
     let currentUrls = await getUrls();
@@ -523,9 +522,9 @@ async function handleRequest(request) {
     }
   }
 
-  return new Response(HTML_PAGE.replace('${PASSWORD}', PASSWORD), {
-    headers: { 'Content-Type': 'text/html;charset=UTF-8' }
-  });
+  return new Response(HTML_PAGE(PASSWORD), {
+  headers: { 'Content-Type': 'text/html;charset=UTF-8' }
+});
 }
 
 async function getUrls() {
