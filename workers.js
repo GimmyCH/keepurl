@@ -16,7 +16,7 @@ const PASSWORD = '';  // 修改这里来设置你的操作密码
 
 // 默认 URL 列表 (如果 KV 为空时初始化用)
 const DEFAULT_URLS = [
-  "",
+  "www.abc.com",
   ""
 ];
 
