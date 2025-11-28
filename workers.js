@@ -7,8 +7,8 @@
  *    
  */
 
-const TELEGRAM_TOKEN = '8194252081:AAGOi1ei7qXzcr2d6bg1bd2p3SeSN9LhFhk';//你的电  报机器人Token
-const CHAT_ID = '-4980072044';//你的电报群ID
+const TELEGRAM_TOKEN = '';//你的电  报机器人Token
+const CHAT_ID = '';//你的电报群ID
 const TG_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
 // === 自定义密码配置 ===
