@@ -7,16 +7,17 @@
  *    
  */
 
-const TELEGRAM_TOKEN = '';//你的电  报机器人Token
-const CHAT_ID = '';//你的电报群ID
+const TELEGRAM_TOKEN = '8194252081:AAGOi1ei7qXzcr2d6bg1bd2p3SeSN9LhFhk';//你的电  报机器人Token
+const CHAT_ID = '-4980072044';//你的电报群ID
 const TG_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
 // === 自定义密码配置 ===
-const PASSWORD = '';  // 修改这里来设置你的操作密码
+// const PASSWORD = '';  // 修改这里来设置你的操作密码
 
 // 默认 URL 列表 (如果 KV 为空时初始化用)
 const DEFAULT_URLS = [
-  "https://www.abc.com"
+    "",
+    ""
 ];
 
 // HTML 模板
@@ -386,7 +387,15 @@ const HTML_PAGE = `
       const input = document.getElementById('newUrl');
       const text = input.value.trim();
       if (!text) return;
-      const urlsToAdd = text.split(/[\\r\\n]+/).map(u => u.trim()).filter(u => u);
+      const urlsToAdd = text.split(/[\r\n]+/)
+        .map(u => u.trim())
+        .filter(u => u)
+        .map(u => {
+          if (!/^https?:\/\//i.test(u)) {
+            return 'https://' + u;
+          }
+          return u;
+        });
       if (urlsToAdd.length === 0) return;
 
       const res = await fetch('/api/urls', {
@@ -447,154 +456,155 @@ const HTML_PAGE = `
 // === 主逻辑 ===
 
 addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request));
+    event.respondWith(handleRequest(event.request));
 });
 
 addEventListener('scheduled', event => {
-  event.waitUntil(handleScheduled());
+    event.waitUntil(handleScheduled());
 });
 
 async function handleRequest(request) {
-  const url = new URL(request.url);
+    const url = new URL(request.url);
 
-  if (request.method === 'GET' && url.pathname === '/api/urls') {
-    const urls = await getUrls();
-    return new Response(JSON.stringify(urls), {
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  if (request.method === 'POST' && url.pathname === '/api/urls') {
-    const { urls: newUrls, password } = await request.json();
-
-  if (password !== PASSWORD) {
-      return new Response("Unauthorized", { status: 401 });
+    if (request.method === 'GET' && url.pathname === '/api/urls') {
+        const urls = await getUrls();
+        return new Response(JSON.stringify(urls), {
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
-    let currentUrls = await getUrls();
-    let addedCount = 0;
-    if (Array.isArray(newUrls)) {
-      newUrls.forEach(u => {
-        if (u && !currentUrls.includes(u)) {
-          currentUrls.push(u);
-          addedCount++;
+    if (request.method === 'POST' && url.pathname === '/api/urls') {
+        const { urls: newUrls, password } = await request.json();
+
+        if (password !== PASSWORD) {
+            return new Response('Unauthorized', { status: 401 });
         }
-      });
-      if (addedCount > 0) {
-        await saveUrls(currentUrls);
-      }
+
+        let currentUrls = await getUrls();
+        let addedCount = 0;
+        if (Array.isArray(newUrls)) {
+            newUrls.forEach(u => {
+                if (u && !currentUrls.includes(u)) {
+                    currentUrls.push(u);
+                    addedCount++;
+                }
+            });
+            if (addedCount > 0) {
+                await saveUrls(currentUrls);
+            }
+        }
+
+        return new Response(JSON.stringify({ status: 'ok', added: addedCount, urls: currentUrls }), { headers: { 'Content-Type': 'application/json' } });
     }
 
-    return new Response(JSON.stringify({ status: 'ok', added: addedCount, urls: currentUrls }), { headers: { 'Content-Type': 'application/json' } });
-  }
+    if (request.method === 'DELETE' && url.pathname === '/api/urls') {
+        const { url: delUrl, password } = await request.json();
 
-  if (request.method === 'DELETE' && url.pathname === '/api/urls') {
-    const { url: delUrl, password } = await request.json();
+        if (password !== PASSWORD) {
+            return new Response('Unauthorized', { status: 401 });
+        }
 
-    if (password !== PASSWORD) {
-      return new Response('Unauthorized', { status: 401 });
+        let urls = await getUrls();
+        urls = urls.filter(u => u !== delUrl);
+        await saveUrls(urls);
+        return new Response(JSON.stringify({ status: 'ok', urls }), { headers: { 'Content-Type': 'application/json' } });
     }
 
-    let urls = await getUrls();
-    urls = urls.filter(u => u !== delUrl);
-    await saveUrls(urls);
-    return new Response(JSON.stringify({ status: 'ok', urls }), { headers: { 'Content-Type': 'application/json' } });
-  }
+    if (request.method === 'GET' && url.pathname === '/api/check') {
+        const targetUrl = url.searchParams.get('url');
+        if (!targetUrl) return new Response('Missing url', { status: 400 });
 
-  if (request.method === 'GET' && url.pathname === '/api/check') {
-    const targetUrl = url.searchParams.get('url');
-    if (!targetUrl) return new Response('Missing url', { status: 400 });
-
-    try {
-      const res = await fetch(targetUrl, {
-        method: 'GET',
-        headers: { 'User-Agent': 'KeepURL-Check/1.0' },
-        redirect: 'follow'
-      });
-      const isOk = res.status < 500;
-      return new Response(JSON.stringify({ ok: isOk, status: res.status }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } catch (e) {
-      return new Response(JSON.stringify({ ok: false, status: 0 }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+        try {
+            const res = await fetch(targetUrl, {
+                method: 'GET',
+                headers: { 'User-Agent': 'KeepURL-Check/1.0' },
+                redirect: 'follow'
+            });
+            const isOk = res.status < 500;
+            return new Response(JSON.stringify({ ok: isOk, status: res.status }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (e) {
+            return new Response(JSON.stringify({ ok: false, status: 0 }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
     }
-  }
 
-  return new Response(HTML_PAGE(PASSWORD), {
-  headers: { 'Content-Type': 'text/html;charset=UTF-8' }
-});
+    return new Response(HTML_PAGE.replace('${PASSWORD}', PASSWORD), {
+        headers: { 'Content-Type': 'text/html;charset=UTF-8' }
+    });
 }
 
 async function getUrls() {
-  let urlsStr = await keepURL.get('urls');
-  if (!urlsStr) {
-    return DEFAULT_URLS;
-  }
-  return JSON.parse(urlsStr);
+    let urlsStr = await keepURL.get('urls');
+    if (!urlsStr) {
+        return DEFAULT_URLS;
+    }
+    return JSON.parse(urlsStr);
 }
 
 async function saveUrls(urls) {
-  await keepURL.put('urls', JSON.stringify(urls));
+    await keepURL.put('urls', JSON.stringify(urls));
 }
 
 async function handleScheduled() {
-  const urls = await getUrls();
-  console.log(`⏳ 开始检测 ${urls.length} 个 URL`);
+    const urls = await getUrls();
+    console.log(`⏳ 开始检测 ${urls.length} 个 URL`);
 
-  let success = 0;
-  let fail = 0;
+    let success = 0;
+    let fail = 0;
 
-  for (const url of urls) {
-    const ok = await checkUrl(url);
-    if (ok) success++;
-    else fail++;
-  }
+    for (const url of urls) {
+        const ok = await checkUrl(url);
+        if (ok) success++;
+        else fail++;
+    }
 
-  const msg = `📊 *KeepURL 监控报告*\n\n✅ 成功: ${success}\n❌ 失败: ${fail}\n总计: ${urls.length}\n\n时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`;
+    const msg = `📊 *KeepURL 监控报告*\n\n✅ 成功: ${success}\n❌ 失败: ${fail}\n总计: ${urls.length}\n\n时间: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`;
 
-  // 发送汇总报告（无论成功失败都发送，确保你知道它在运行）
-  await sendTelegramMessage(msg);
+    // 发送汇总报告（无论成功失败都发送，确保你知道它在运行）
+    await sendTelegramMessage(msg);
 }
 
 async function checkUrl(url) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'KeepURL-Monitor/1.0' }
-    });
+    try {
+        const res = await fetch(url, {
+            signal: controller.signal,
+            headers: { 'User-Agent': 'KeepURL-Monitor/1.0' }
+        });
 
-    if (res.status < 500) {
-      return true;
-    } else {
-      await sendTelegramMessage(`⚠️ *访问异常*\nURL: ${url}\n状态码: ${res.status}`);
-      return false;
+        if (res.status < 500) {
+            return true;
+        } else {
+            await sendTelegramMessage(`⚠️ *访问异常*\nURL: ${url}\n状态码: ${res.status}`);
+            return false;
+        }
+    } catch (err) {
+        await sendTelegramMessage(`❌ *连接失败*\nURL: ${url}\n错误: ${err.message}`);
+        return false;
+    } finally {
+        clearTimeout(timeout);
     }
-  } catch (err) {
-    await sendTelegramMessage(`❌ *连接失败*\nURL: ${url}\n错误: ${err.message}`);
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
 }
 
 async function sendTelegramMessage(text) {
-  try {
-    await fetch(TG_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text,
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true
-      })
-    });
-  } catch (e) {
-    console.log('TG 发送失败', e);
-  }
+    try {
+        await fetch(TG_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            })
+        });
+    } catch (e) {
+        console.log('TG 发送失败', e);
+    }
 }
+
